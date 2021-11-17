@@ -14,20 +14,20 @@ extern  fputs
 extern  sscanf
 
 section .data
-    msjIngresarOperando db "Ingrese un operando inicial por teclado",0
-    msjOperandoIngresado db	"Usted ingreso: %s ",10,0
+    ;msjIngresarOperando db "Ingrese un operando inicial por teclado",0
+    msjOperandoIngresado db	"Usted ingreso el operando inicial: %s ",10,0
 
 section .bss
-    operandoInicial resb 500
+    operandoInicial resb 16
 
 section .text    
 
 main:
     ; Pido por consola el ingreso del operando incial
-    mov rcx, msjIngresarOperando
-    sub	rsp, 32
-	call puts
-	add	rsp, 32
+    ;mov rcx, msjIngresarOperando
+    ;sub	rsp, 32
+	;call puts
+	;add	rsp, 32
 
     mov rcx, operandoInicial
     sub rsp, 32
