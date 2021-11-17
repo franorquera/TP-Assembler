@@ -5,8 +5,8 @@
 ## Secuencia de operaciones lógicas (I)
 
 Se dispone de un archivo que contiene registros con el siguiente contenido:
-● Operando: secuencia de caracteres que simbolizan bits (caracteres 0 o 1) (16 bytes)
-● Operación: carácter que simboliza una operación a efectuar entre dos operandos, y puede ser O
+Operando: secuencia de caracteres que simbolizan bits (caracteres 0 o 1) (16 bytes)
+Operación: carácter que simboliza una operación a efectuar entre dos operandos, y puede ser O
 (Or), X (Xor) y N (And) (1 byte)
 
 Nota: Tenga en cuenta que los registros son secuencias de bytes contiguos en la memoria, sin saltos de línea.
@@ -19,10 +19,11 @@ Op. Ini Operac. Reg.1 Op. Reg 1 -> Res. Parcial Operac. Reg. 2 Op. Reg 2 -> Res.
 
 ### Ejemplo:
 Operando Inicial = 0000000000000101
+
 Operando Registro 1 = 1111111111111111
 Operación Registro 1 = X (Xor)
-● Resultado Parcial = 1111111111111010
+Resultado Parcial = 1111111111111010
 
 Operando Registro 2 = 0000111100001111
 Operación Registro 2 = N (And)
-● Resultado Parcial = 0000111100001010
+Resultado Parcial = 0000111100001010
