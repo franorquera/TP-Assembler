@@ -14,11 +14,13 @@ extern  fputs
 extern  sscanf
 
 section .data
-    msjIngresarOperando db "Ingrese un operando inicial por teclado (max 99 caracteres)",0
-    msjOperandoIngresado db	"Usted ingreso %s: ",10,0
+    msjIngresarOperando db "Ingrese un operando inicial por teclado",0
+    msjOperandoIngresado db	"Usted ingreso: %s ",10,0
 
 section .bss
-    operandoInicial resb 100
+    operandoInicial resb 500
+
+section .text    
 
 main:
     ; Pido por consola el ingreso del operando incial
@@ -26,13 +28,16 @@ main:
     sub	rsp, 32
 	call puts
 	add	rsp, 32
+
     mov rcx, operandoInicial
     sub rsp, 32
     call gets
     add rsp, 32
+    
     mov rcx, msjOperandoIngresado
     mov rdx, operandoInicial
     sub	rsp, 32
 	call printf
 	add	rsp, 32
+
     ret
