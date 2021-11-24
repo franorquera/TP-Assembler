@@ -34,6 +34,7 @@ section .data
     ; Variables para comparar si los registros son validos:
     operacionesValidas db "XON",0
     operandosValidos db "01",0
+    resetOperacion db ' ',0
 
     bufferRegistro times 17 db ' ' 
     operando times 16 db ' '
@@ -116,7 +117,8 @@ leerSiguienteRegistro:
 
     ; Valido los registros
     call validarRegistros
-
+    call borrarContenidoOperacion ; CHEQUEAR ESTO!
+    
     ; Leo el siguiente registro:
     jmp leerSiguienteRegistro
 
@@ -182,6 +184,15 @@ copiarOperacion:
     ret
 
 ;------------------------------------------------------
+; Borro el contenido de la operacion para la nueva iteracion
+borrarContenidoOperacion:
+    mov rcx, 1
+    lea rsi, [resetOperacion]
+    lea rdi, [operacion]
+    repe movsb
+    ret
+
+;------------------------------------------------------
 ;VALIDAR Operando
 validarOperando:
     mov byte[registroValido], "S"
@@ -200,9 +211,9 @@ validarOperacion:
 proximaOperacion:
     push rcx ; me guardo el 3 del loop
     mov rcx, 1 ; saltos que pego para comparar
-    lea rsi, [operacion] ; OJOJOJOJOJOJOJOJO
+    lea rsi, [operacion]
     lea rdi, [operacionesValidas + rbx]
-repe cmpsb
+    repe cmpsb
     pop rcx ; vuelve el valor del loop
 
     je operacionOk ; si lo encontre dejo de iterar
