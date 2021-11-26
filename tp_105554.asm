@@ -19,6 +19,7 @@ section .data
     modoLecturaRegistros db "r",0
     msjErrorAperturaRegistros db "Error al intentar abrir el archivo Registros",0
     msjErrorRegistroInvalido db "El operando u operacion no es valido",0
+    msjErrorOperandoInicialInvalido db "El operando ingresado es invalido",0
     registrosId dq 0
 
     ; Opcional msj debug:
@@ -34,6 +35,8 @@ section .data
     ; Variables para comparar si los registros son validos:
     operacionesValidas db "XON",0
     operandosValidos db "01",0
+    primerOperandoValido db "0",0
+    segundoOperandoValido db "1",0
     resetOperacion db ' ',0
 
     bufferRegistro times 17 db ' ' 
@@ -59,6 +62,13 @@ main:
 	call printf
 	add	rsp, 32
 
+    ; Chequeo que el operando ingresado sea valido
+    mov byte[registroValido], "N" ; el registro comienza no siendo valido
+
+    call validarOperandoInicial
+    cmp byte[registroValido], "N"
+    jle finValidarOperandoInicial
+
     ; Abro el archivo con los operando
     mov rcx, archivoRegistros
     mov rdx, modoLecturaRegistros
@@ -81,7 +91,7 @@ leerSiguienteRegistro:
     mov rdx, 18 ; lee 17 caracteres
     mov r8, [registrosId]
     sub		rsp,32
-    call	fgets ; AHHHHHHHHHHHHHHHHHHHHHHHHHH
+    call	fgets
     add		rsp,32
     
     ; Llegue al final del archivo?
@@ -146,9 +156,9 @@ validarRegistros:
     cmp byte[registroValido], "N"
     jle finValidarRegistro
 
-    ;call validarOperando
-    ;cmp byte[registroValido], "N"
-    ;jle finValidarRegistro
+    call validarOperando
+    cmp byte[registroValido], "N"
+    jle finValidarRegistro
 
     mov byte[registroValido], "S" ; si llego hasta aca quiere decir que el registro es valido
 
@@ -157,13 +167,6 @@ validarRegistros:
     call	puts
     add		rsp,32
 
-    ret
-
-finValidarRegistro:
-    mov rcx, msjErrorRegistroInvalido
-    sub		rsp,32
-    call	puts
-    add		rsp,32
     ret
 
 ;------------------------------------------------------
@@ -192,13 +195,69 @@ borrarContenidoOperacion:
     repe movsb
     ret
 
+
+;------------------------------------------------------
+; Validar Operando Inicial
+validarOperandoInicial:
+    mov byte[registroValido], "S"
+    mov rbx, 0
+    mov rcx, 16
+    
+    _proximaOperando:
+    push rcx
+    mov rcx, 1
+    lea rsi, [operandoInicial + rbx]
+    lea rdi, [primerOperandoValido]
+    repe cmpsb
+    pop rcx
+    jne _segudnoOperando
+    _proximaComparacion:
+    add rbx, 1
+    loop _proximaOperando
+    mov byte[registroValido], "S"
+    ret
+
+    _segudnoOperando:
+    lea rsi, [operandoInicial + rbx]
+    lea rdi, [segundoOperandoValido]
+    cmpsb
+    jne _operandoNoValido
+    jmp _proximaComparacion
+
+    _operandoNoValido:
+    mov byte[registroValido], "N"
+    ret
+
 ;------------------------------------------------------
 ;VALIDAR Operando
 validarOperando:
     mov byte[registroValido], "S"
     mov rbx, 0
-    mov rcx, 16 ; ??
+    mov rcx, 16
+    
+    proximaOperando:
+    push rcx
+    mov rcx, 1
+    lea rsi, [operando + rbx]
+    lea rdi, [primerOperandoValido]
+    repe cmpsb
+    pop rcx
+    jne segudnoOperando
+    proximaComparacion:
+    add rbx, 1
+    loop proximaOperando
+    mov byte[registroValido], "S"
+    ret
 
+    segudnoOperando:
+    lea rsi, [operando + rbx]
+    lea rdi, [segundoOperandoValido]
+    cmpsb
+    jne operandoNoValido
+    jmp proximaComparacion
+
+    operandoNoValido:
+    mov byte[registroValido], "N"
     ret
 
 ;------------------------------------------------------
@@ -208,7 +267,7 @@ validarOperacion:
     mov rbx, 0
     mov rcx, 3 ; para el loop --> 3 operanods en total
     
-proximaOperacion:
+    proximaOperacion:
     push rcx ; me guardo el 3 del loop
     mov rcx, 1 ; saltos que pego para comparar
     lea rsi, [operacion]
@@ -222,5 +281,21 @@ proximaOperacion:
     loop proximaOperacion
     mov byte[registroValido], "N"
 
-operacionOk:
+    operacionOk:
+    ret
+
+;------------------------------------------------------
+; Mensajes de Error
+finValidarOperandoInicial:
+    mov rcx, msjErrorOperandoInicialInvalido
+    sub		rsp,32
+    call	puts
+    add		rsp,32
+    ret
+
+finValidarRegistro:
+    mov rcx, msjErrorRegistroInvalido
+    sub		rsp,32
+    call	puts
+    add		rsp,32
     ret
