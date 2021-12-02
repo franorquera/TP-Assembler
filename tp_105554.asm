@@ -22,6 +22,13 @@ section .data
     msjErrorOperandoInicialInvalido db "El operando ingresado es invalido",0
     registrosId dq 0
 
+    resultadoParcial times 16 db ' '
+
+    comparacionOperacionesUno dq 1 ; lo uso en el and
+    comparacionOperacionesCero dq 0
+
+    msjErrorPrueba db "ERRORRRRR",0
+
     ; Opcional msj debug:
     msjAperturaCorrecta db "El archivo se pudo abrir correctamente",0
     msjLecturaDeRegistro db "El registro esta siendo leido",0
@@ -47,6 +54,7 @@ section .bss
     operandoInicial resb 16
     registroValido resb 1
     datoValido resb 1 ; para que mierda tengo esto aca
+    operacionAAplicar resb 1
 
 section .text    
 
@@ -86,7 +94,7 @@ main:
     add		rsp,32
 
     ; Empiezo a leer el registro
-leerSiguienteRegistro:
+    leerSiguienteRegistro:
     mov rcx, bufferRegistro
     mov rdx, 18 ; lee 17 caracteres
     mov r8, [registrosId]
@@ -113,24 +121,35 @@ leerSiguienteRegistro:
 
     call copiarOperando
 
-    mov rcx, operando
-    sub		rsp,32
-    call	puts
-    add		rsp,32
+    ;mov rcx, operando
+    ;sub		rsp,32
+    ;call	puts
+    ;add		rsp,32
 
     call copiarOperacion
 
-    mov rcx, operacion
-    sub		rsp,32
-    call	puts
-    add		rsp,32
+    ;mov rcx, operacion
+    ;sub		rsp,32
+    ;call	puts
+    ;add		rsp,32
 
     ; Valido los registros
     call validarRegistros
+    
+    ; Aplico los operandos entre el operando inicial y los del registro
+    call aplicarOperacion
+
+    mov rcx, resultadoParcial
+    sub		rsp,32
+    call	puts
+    add		rsp,32
+    
     call borrarContenidoOperacion ; CHEQUEAR ESTO!
     
     ; Leo el siguiente registro:
     jmp leerSiguienteRegistro
+    call cerrarRegistros
+
 
 errorAbrirRegistros:
         mov rcx, msjErrorAperturaRegistros
@@ -149,6 +168,60 @@ cerrarRegistros:
 terminarPrograma:
         ret
 
+;------------------------------------------------------
+; Aplico la operacion entre los operandos
+aplicarOperacion:
+    ;1000111100001111
+    cmp byte[operacion], "N"
+    jle aplicarOperacionAnd
+
+    ;cmp byte[operacion], "O"
+    ;jle aplicarOperacionOr
+
+    ;cmp byte[operacion], "X"
+    ;jle aplicarOperacionXOr
+
+    ret
+
+    aplicarOperacionAnd:
+    mov rbx, 0
+    ; RESOLVER ESTO!
+    ;mov rcx, [operandoInicial + rbx]
+    ;sub		rsp,32
+    ;call	puts
+    ;add		rsp,32
+
+    mov rcx, 16
+    andProxComparacion:
+    mov rax, [operandoInicial + rbx]
+    cmp rax, [operando + rbx]
+    jz andSonIguales
+    ; no son iguales
+    mov rax, [comparacionOperacionesCero]
+    mov [resultadoParcial + rbx], rax
+    andProx:
+    add rbx, 1
+    loop andProxComparacion
+    ret
+
+
+    andSonIguales:
+    ; caso los dos son 1
+    cmp rax, [comparacionOperacionesUno] ; significa que es un 1
+    jz andAmbosSonUno
+    ;caso los dos son 0
+    mov [resultadoParcial + rbx], rax
+    jmp andProx
+    ret
+
+    andAmbosSonUno:
+    mov [resultadoParcial + rbx], rax
+    jmp andProx
+    ret
+    
+
+;------------------------------------------------------
+; Validacion de los registros
 validarRegistros:
     mov byte[registroValido], "N" ; el registro comienza no siendo valido
 
