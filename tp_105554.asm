@@ -22,10 +22,10 @@ section .data
     msjErrorOperandoInicialInvalido db "El operando ingresado es invalido",0
     registrosId dq 0
 
-    resultadoParcial times 16 db ' '
+    ;resultadoParcial times 16 db ' '
 
-    comparacionOperacionesUno dq 1 ; lo uso en el and
-    comparacionOperacionesCero dq 0
+    comparacionOperacionesUno db "1", 0 ; lo uso en el and
+    comparacionOperacionesCero db "0", 0
 
     msjErrorPrueba db "ERRORRRRR",0
 
@@ -52,6 +52,7 @@ section .data
 
 section .bss
     operandoInicial resb 16
+    resultadoParcial resb 16
     registroValido resb 1
     datoValido resb 1 ; para que mierda tengo esto aca
     operacionAAplicar resb 1
@@ -121,17 +122,17 @@ main:
 
     call copiarOperando
 
-    ;mov rcx, operando
-    ;sub		rsp,32
-    ;call	puts
-    ;add		rsp,32
+    mov rcx, operando
+    sub		rsp,32
+    call	puts
+    add		rsp,32
 
     call copiarOperacion
 
-    ;mov rcx, operacion
-    ;sub		rsp,32
-    ;call	puts
-    ;add		rsp,32
+    mov rcx, operacion
+    sub		rsp,32
+    call	puts
+    add		rsp,32
 
     ; Valido los registros
     call validarRegistros
@@ -171,7 +172,8 @@ terminarPrograma:
 ;------------------------------------------------------
 ; Aplico la operacion entre los operandos
 aplicarOperacion:
-    ;1000111100001111
+    ;1000111100001111 ACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    ;cmp byte[operacion], "N"
     cmp byte[operacion], "N"
     jle aplicarOperacionAnd
 
@@ -185,40 +187,49 @@ aplicarOperacion:
 
     aplicarOperacionAnd:
     mov rbx, 0
-    ; RESOLVER ESTO!
-    ;mov rcx, [operandoInicial + rbx]
-    ;sub		rsp,32
-    ;call	puts
-    ;add		rsp,32
+
+     ; RESOLVER ESTO!
+    mov rcx, operando
+    sub	rsp,32
+    call	puts
+    add	rsp,32
 
     mov rcx, 16
+
     andProxComparacion:
-    mov rax, [operandoInicial + rbx]
-    cmp rax, [operando + rbx]
-    jz andSonIguales
+    push rcx
+    mov rcx, 1 ; comparacion
+    lea rsi, [operandoInicial + rbx]
+    lea rdi, [operando + rbx]
+    cmpsb 
+    je andSonIguales
     ; no son iguales
-    mov rax, [comparacionOperacionesCero]
-    mov [resultadoParcial + rbx], rax
+    lea rsi, [comparacionOperacionesCero]
+    lea rdi, [resultadoParcial + rbx]
+    movsb
     andProx:
     add rbx, 1
+    pop rcx
     loop andProxComparacion
     ret
 
 
     andSonIguales:
     ; caso los dos son 1
-    cmp rax, [comparacionOperacionesUno] ; significa que es un 1
-    jz andAmbosSonUno
+    lea rdi, [comparacionOperacionesUno]
+    cmpsb ; significa que es un 1
+    je andAmbosSonUno
     ;caso los dos son 0
-    mov [resultadoParcial + rbx], rax
+    lea rdi, [resultadoParcial + rbx]
+    movsb
     jmp andProx
     ret
 
     andAmbosSonUno:
-    mov [resultadoParcial + rbx], rax
+    lea rdi, [resultadoParcial + rbx]
+    movsb
     jmp andProx
     ret
-    
 
 ;------------------------------------------------------
 ; Validacion de los registros
