@@ -20,9 +20,16 @@ section .data
     msjErrorAperturaRegistros db "Error al intentar abrir el archivo Registros",0
     msjErrorRegistroInvalido db "El operando u operacion no es valido",0
     msjErrorOperandoInicialInvalido db "El operando ingresado es invalido",0
+    
+    msjOperandoInicial db "Operando inical = %s",10,10,0
+    msjOperandoRegistro db "Operando Registro %lli = %s",10,0
+    msjOperacionRegistro db "Operacion Registro %lli = %s",10,0
+    msjResultadoParcial db "Resultado Parcial = %s",10,10,0
+    cantidadRegistros dq 1
+    
     registrosId dq 0
 
-    ;resultadoParcial times 16 db ' '
+    ;resultadoParcial times 16 db ' ', 0
 
     comparacionOperacionesUno db "1", 0 ; lo uso en el and
     comparacionOperacionesCero db "0", 0
@@ -47,15 +54,15 @@ section .data
     resetOperacion db ' ',0
 
     bufferRegistro times 17 db ' ' 
-    operando times 16 db ' '
-    operacion times 1 db ' '
+    operando times 16 db ' ', 0
+    operacion times 1 db ' ', 0
 
 section .bss
     operandoInicial resb 16
-    resultadoParcial resb 16
     registroValido resb 1
     datoValido resb 1 ; para que mierda tengo esto aca
     operacionAAplicar resb 1
+    resultadoParcial resb 16  ;ESTE ES EL QUE NECESITO PARA LA SOLUCION DE GIT
 
 section .text    
 
@@ -64,8 +71,8 @@ main:
     sub rsp, 32
     call gets
     add rsp, 32
-    
-    mov rcx, msjOperandoIngresado
+
+    mov rcx, msjOperandoInicial
     mov rdx, operandoInicial
     sub	rsp, 32
 	call printf
@@ -89,11 +96,6 @@ main:
     jle errorAbrirRegistros
     mov [registrosId], rax
 
-    mov rcx, msjAperturaCorrecta
-    sub		rsp,32
-    call	puts
-    add		rsp,32
-
     ; Empiezo a leer el registro
     leerSiguienteRegistro:
     mov rcx, bufferRegistro
@@ -107,47 +109,43 @@ main:
     cmp rax, 0
     jle cerrarRegistros
 
-
-    ; Mensaje de lectura de un SOLO registro:
-    mov rcx, msjLecturaDeRegistro
-    sub		rsp,32
-    call	puts
-    add		rsp,32
-
-    ; Solo para chequear, imprimo el operando y la operacion
-    ;mov rcx, bufferRegistro
-    ;sub		rsp,32
-    ;call	puts
-    ;add		rsp,32
-
     call copiarOperando
 
-    mov rcx, operando
-    sub		rsp,32
-    call	puts
-    add		rsp,32
+    mov rcx, msjOperandoRegistro
+    mov rdx, [cantidadRegistros]
+    mov r8, operando
+    sub	rsp, 32
+	call printf
+	add	rsp, 32
 
     call copiarOperacion
 
-    mov rcx, operacion
-    sub		rsp,32
-    call	puts
-    add		rsp,32
+    mov rcx, msjOperacionRegistro
+    mov rdx, [cantidadRegistros]
+    mov r8, operacion
+    sub	rsp, 32
+	call printf
+	add	rsp, 32
 
     ; Valido los registros
     call validarRegistros
     
     ; Aplico los operandos entre el operando inicial y los del registro
     call aplicarOperacion
+    ;call aplicarOperacionPrueba
 
-    mov rcx, resultadoParcial
-    sub		rsp,32
-    call	puts
-    add		rsp,32
+    mov rcx, msjResultadoParcial
+    mov rdx, resultadoParcial
+    sub	rsp, 32
+	call printf
+	add	rsp, 32
     
     call borrarContenidoOperacion ; CHEQUEAR ESTO!
     
     ; Leo el siguiente registro:
+    mov rbx, cantidadRegistros
+    add rbx, 1
+    mov [cantidadRegistros], rbx
     jmp leerSiguienteRegistro
     call cerrarRegistros
 
@@ -172,28 +170,20 @@ terminarPrograma:
 ;------------------------------------------------------
 ; Aplico la operacion entre los operandos
 aplicarOperacion:
-    ;1000111100001111 ACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    ;cmp byte[operacion], "N"
     cmp byte[operacion], "N"
     jle aplicarOperacionAnd
 
-    ;cmp byte[operacion], "O"
-    ;jle aplicarOperacionOr
+    cmp byte[operacion], "O"
+    jle aplicarOperacionOr
 
     ;cmp byte[operacion], "X"
     ;jle aplicarOperacionXOr
 
     ret
 
+; Aplico la operacion And entre los operandos
     aplicarOperacionAnd:
     mov rbx, 0
-
-     ; RESOLVER ESTO!
-    mov rcx, operando
-    sub	rsp,32
-    call	puts
-    add	rsp,32
-
     mov rcx, 16
 
     andProxComparacion:
@@ -204,7 +194,7 @@ aplicarOperacion:
     cmpsb 
     je andSonIguales
     ; no son iguales
-    lea rsi, [comparacionOperacionesCero]
+    lea rsi, [comparacionOperacionesUno]
     lea rdi, [resultadoParcial + rbx]
     movsb
     andProx:
@@ -213,23 +203,26 @@ aplicarOperacion:
     loop andProxComparacion
     ret
 
-
     andSonIguales:
     ; caso los dos son 1
+    lea rsi, [operandoInicial + rbx] ; AGREAGADO
     lea rdi, [comparacionOperacionesUno]
-    cmpsb ; significa que es un 1
-    je andAmbosSonUno
+    cmpsb
+    je andAmbosSonUno ; significa que es un 1
     ;caso los dos son 0
-    lea rdi, [resultadoParcial + rbx]
+    lea rsi, [operandoInicial + rbx]
+    lea rdi, [resultadoParcial + rbx] 
     movsb
     jmp andProx
-    ret
 
     andAmbosSonUno:
+    lea rsi, [comparacionOperacionesCero] ; AGREAGADO
     lea rdi, [resultadoParcial + rbx]
     movsb
     jmp andProx
-    ret
+
+; Aplico la operacion Or entre los operandos
+    aplicarOperacionOr:
 
 ;------------------------------------------------------
 ; Validacion de los registros
@@ -245,11 +238,6 @@ validarRegistros:
     jle finValidarRegistro
 
     mov byte[registroValido], "S" ; si llego hasta aca quiere decir que el registro es valido
-
-    mov rcx, msjRegistroValido
-    sub		rsp,32
-    call	puts
-    add		rsp,32
 
     ret
 
@@ -382,4 +370,15 @@ finValidarRegistro:
     sub		rsp,32
     call	puts
     add		rsp,32
+    ret
+
+
+; PRUEBA --> solucion con operaciones logicass
+aplicarOperacionPrueba:
+    mov rcx, 16
+    lea rsi, [operando]
+    lea rdi, [operandoInicial]
+    and rsi, rdi
+    lea rdi, [resultadoParcial]
+    repe movsb
     ret
