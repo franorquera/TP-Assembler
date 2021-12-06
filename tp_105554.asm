@@ -170,8 +170,8 @@ aplicarOperacion:
     cmp byte[operacion], "O"
     jle aplicarOperacionOr
 
-    ;cmp byte[operacion], "X"
-    ;jle aplicarOperacionXOr
+    cmp byte[operacion], "X"
+    jle aplicarOperacionXOr
 
     ret
 
@@ -188,7 +188,7 @@ aplicarOperacion:
     cmpsb 
     je andSonIguales
     ; no son iguales
-    lea rsi, [comparacionOperacionesUno]
+    lea rsi, [comparacionOperacionesCero] ; agrego un cero
     lea rdi, [resultadoParcial + rbx]
     movsb
     andProx:
@@ -204,19 +204,96 @@ aplicarOperacion:
     cmpsb
     je andAmbosSonUno ; significa que es un 1
     ;caso los dos son 0
-    lea rsi, [operandoInicial + rbx]
+    lea rsi, [operandoInicial + rbx] ; agrego un cero
     lea rdi, [resultadoParcial + rbx] 
     movsb
     jmp andProx
 
     andAmbosSonUno:
-    lea rsi, [comparacionOperacionesCero] ; AGREAGADO
+    lea rsi, [comparacionOperacionesUno] ; agrego un uno
     lea rdi, [resultadoParcial + rbx]
     movsb
     jmp andProx
 
 ; Aplico la operacion Or entre los operandos
     aplicarOperacionOr:
+    mov rbx, 0
+    mov rcx, 16
+
+    orProxComparacion:
+    push rcx
+    mov rcx, 1 ; comparacion
+    lea rsi, [operandoInicial + rbx]
+    lea rdi, [operando + rbx]
+    cmpsb 
+    je orSonIguales
+    ; no son iguales
+    lea rsi, [comparacionOperacionesUno]
+    lea rdi, [resultadoParcial + rbx]
+    movsb
+    orProx:
+    add rbx, 1
+    pop rcx
+    loop orProxComparacion
+    ret
+
+    orSonIguales:
+    ; caso los dos son 1
+    lea rsi, [operandoInicial + rbx] ; AGREAGADO
+    lea rdi, [comparacionOperacionesUno]
+    cmpsb
+    je orAmbosSonUno ; significa que es un 1
+    ;caso los dos son 0
+    lea rsi, [operandoInicial + rbx] ; agrego el cero
+    lea rdi, [resultadoParcial + rbx] 
+    movsb
+    jmp orProx
+
+    orAmbosSonUno:
+    lea rsi, [comparacionOperacionesUno] ; AGREAGADO
+    lea rdi, [resultadoParcial + rbx]
+    movsb
+    jmp orProx
+
+; Aplico la operacion Xor entre los operandos
+    aplicarOperacionXOr:
+    mov rbx, 0
+    mov rcx, 16
+
+    xOrProxOperacion:
+    push rcx
+    mov rcx, 1 ; comparacion
+    lea rsi, [operandoInicial + rbx]
+    lea rdi, [operando + rbx]
+    cmpsb 
+    je xOrSonIguales
+    ; no son iguales
+    lea rsi, [comparacionOperacionesUno] ; agrego un uno
+    lea rdi, [resultadoParcial + rbx]
+    movsb
+    xOrProx:
+    add rbx, 1
+    pop rcx
+    loop xOrProxOperacion
+    ret
+
+    xOrSonIguales:
+    ; caso los dos son 1
+    lea rsi, [operandoInicial + rbx] ; AGREAGADO
+    lea rdi, [comparacionOperacionesUno]
+    cmpsb
+    je xOrAmbosSonUno ; significa que es un 1
+    ;caso los dos son 0
+    lea rsi, [operandoInicial + rbx] ; agrego el cero
+    lea rdi, [resultadoParcial + rbx] 
+    movsb
+    jmp xOrProx
+
+    xOrAmbosSonUno:
+    lea rsi, [comparacionOperacionesCero] ; agrego un cero
+    lea rdi, [resultadoParcial + rbx]
+    movsb
+    jmp xOrProx
 
 ;------------------------------------------------------
 ; Validacion de los registros
