@@ -29,8 +29,6 @@ section .data
     
     registrosId dq 0
 
-    ;resultadoParcial times 16 db ' ', 0
-
     comparacionOperacionesUno db "1", 0 ; lo uso en el and
     comparacionOperacionesCero db "0", 0
 
@@ -41,11 +39,6 @@ section .data
     msjLecturaDeRegistro db "El registro esta siendo leido",0
     msjRegistroValido db "El operando y operacion es valido",0
 
-    ; Lugar donde voy a copiar los registros:
-    ;registros		times	0 	db ''	;Longitud total del registro: 17
-	;  operando		times	16	db ' '
-	;  operacion		times	1	db ' '
-
     ; Variables para comparar si los registros son validos:
     operacionesValidas db "XON",0
     operandosValidos db "01",0
@@ -53,6 +46,7 @@ section .data
     segundoOperandoValido db "1",0
     resetOperacion db ' ',0
 
+    ; Lugar donde voy a copiar los registros:
     bufferRegistro times 17 db ' ' 
     operando times 16 db ' ', 0
     operacion times 1 db ' ', 0
@@ -147,9 +141,9 @@ main:
     add rbx, 1
     mov [cantidadRegistros], rbx
     jmp leerSiguienteRegistro
-    call cerrarRegistros
 
-
+;------------------------------------------------------
+; Error y finalizacion del programa
 errorAbrirRegistros:
         mov rcx, msjErrorAperturaRegistros
         sub		rsp,32
