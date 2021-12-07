@@ -15,33 +15,27 @@ extern  sscanf
 
 section .data
     ; Mensajes y manejo de archivos
-    ;msjOperandoIngresado db	"Usted ingreso el operando inicial: %s ",10,0
     archivoRegistros db "registros.txt",0
     modoLecturaRegistros db "r",0
-    msjErrorAperturaRegistros db "Error al intentar abrir el archivo Registros",0
-    msjErrorRegistroInvalido db "El operando u operacion no es valido",0
-    msjErrorOperandoInicialInvalido db "El operando ingresado es invalido",0
+    msjErrorAperturaRegistros db "❌Error al intentar abrir el archivo Registros",0
+    msjErrorRegistroInvalido db "❌El operando u operacion no es valido",0
+    msjErrorOperandoInicialInvalido db "❌El operando ingresado es invalido",0
+    msjFinDelPrograma db "Fin del programa", 0
     registrosId dq 0
     
     ; Mensajes para imprimir las operaciones entre registros
-    msjOperandoInicial db "Operando inical = %s",10,10,0
-    msjOperandoRegistro db "Operando Registro %lli = %s",10,0
-    msjOperacionRegistro db "Operacion Registro %lli = %s",10,0
-    msjResultadoParcial db "Resultado Parcial = %s",10,10,0
+    msjOperandoInicial db "➜ Operando inical = %s",10,10,0
+    msjOperandoRegistro db "◉ Operando Registro %lli = %s",10,0
+    msjOperacionRegistro db "◉ Operacion Registro %lli = %s",10,0
+    msjResultadoParcial db "✅Resultado Parcial = %s",10,10,0
     cantidadRegistros dq 1
 
     ; Comparacion para las operaciones
     comparacionOperacionesUno db "1", 0 ; lo uso en el and
     comparacionOperacionesCero db "0", 0
 
-    ; Opcional msj debug:
-    ;msjAperturaCorrecta db "El archivo se pudo abrir correctamente",0
-    ;msjLecturaDeRegistro db "El registro esta siendo leido",0
-    ;msjRegistroValido db "El operando y operacion es valido",0
-
     ; Variables para comparar si los registros son validos:
     operacionesValidas db "XON",0
-    ;operandosValidos db "01",0
     primerOperandoValido db "0",0
     segundoOperandoValido db "1",0
     resetOperacion db ' ',0
@@ -128,7 +122,6 @@ main:
     
     ; Aplico los operandos entre el operando inicial y los del registro
     call aplicarOperacion
-    ;call aplicarOperacionPrueba
 
     ; Imprimo el resultado parcial por pantalla
     mov rcx, msjResultadoParcial
@@ -139,9 +132,9 @@ main:
 
     ; me guardo el resultado parcial en el operando inicial
     mov rcx, 16
-    lea rsi, [resultadoParcial] ; lo de aca
-    lea rdi, [operandoInicial]  ; lo copio aca
-    repe movsb ; repe --> lo repito 16 veces xq lo dice en el rcx
+    lea rsi, [resultadoParcial]
+    lea rdi, [operandoInicial]
+    repe movsb
     
     ; borro el contenido xq si no se pisa
     call borrarContenidoOperacion ; CHEQUEAR ESTO!
@@ -156,19 +149,23 @@ main:
 ; Error y finalizacion del programa
 errorAbrirRegistros:
     mov rcx, msjErrorAperturaRegistros
-    sub		rsp,32
-    call	puts
-    add		rsp,32
+    sub	rsp,32
+    call puts
+    add	rsp,32
     jmp terminarPrograma
 
 cerrarRegistros:
     mov rcx, [registrosId]
-    sub		rsp,32
-    call	fclose
-    add		rsp,32
+    sub	rsp,32
+    call fclose
+    add	rsp,32
     jmp terminarPrograma
 
 terminarPrograma:
+    mov rcx, msjFinDelPrograma
+    sub rsp, 32
+    call puts
+    add rsp, 32
     ret
 
 ;------------------------------------------------------
@@ -348,7 +345,6 @@ borrarContenidoOperacion:
     repe movsb
     ret
 
-
 ;------------------------------------------------------
 ; Validar Operando Inicial
 validarOperandoInicial:
@@ -451,15 +447,4 @@ finValidarRegistro:
     sub		rsp,32
     call	puts
     add		rsp,32
-    ret
-
-
-; PRUEBA --> solucion con operaciones logicass
-aplicarOperacionPrueba:
-    mov rcx, 16
-    lea rsi, [operando]
-    lea rdi, [operandoInicial]
-    and rsi, rdi
-    lea rdi, [resultadoParcial]
-    repe movsb
     ret
