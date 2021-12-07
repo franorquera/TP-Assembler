@@ -128,16 +128,23 @@ main:
     call aplicarOperacion
     ;call aplicarOperacionPrueba
 
+    ; Imprimo el resultado parcial por pantalla
     mov rcx, msjResultadoParcial
     mov rdx, resultadoParcial
     sub	rsp, 32
 	call printf
 	add	rsp, 32
+
+    ; me guardo el resultado parcial en el operando inicial
+    mov rcx, 16
+    lea rsi, [operandoInicial]
+    lea rdi, [resultadoParcial]
+    movsb
     
     call borrarContenidoOperacion ; CHEQUEAR ESTO!
     
     ; Leo el siguiente registro:
-    mov rbx, cantidadRegistros
+    mov rbx, [cantidadRegistros]
     add rbx, 1
     mov [cantidadRegistros], rbx
     jmp leerSiguienteRegistro
