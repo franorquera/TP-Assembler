@@ -137,10 +137,11 @@ main:
 
     ; me guardo el resultado parcial en el operando inicial
     mov rcx, 16
-    lea rsi, [operandoInicial]
-    lea rdi, [resultadoParcial]
+    lea rsi, [resultadoParcial] ; lo de aca
+    lea rdi, [operandoInicial]  ; lo copio aca
     movsb
     
+    ; borro el contenido xq si no se pisa
     call borrarContenidoOperacion ; CHEQUEAR ESTO!
     
     ; Leo el siguiente registro:
