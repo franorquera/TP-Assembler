@@ -31,7 +31,7 @@ section .data
     cantidadRegistros dq 1
 
     ; Comparacion para las operaciones
-    comparacionOperacionesUno db "1", 0 ; lo uso en el and
+    comparacionOperacionesUno db "1", 0
     comparacionOperacionesCero db "0", 0
 
     ; Variables para comparar si los registros son validos:
@@ -51,7 +51,6 @@ section .data
 
 section .bss
     registroValido resb 1
-    datoValido resb 1 ; para que mierda tengo esto aca
     operacionAAplicar resb 1
 
 section .text    
@@ -130,14 +129,14 @@ main:
 	call printf
 	add	rsp, 32
 
-    ; me guardo el resultado parcial en el operando inicial
+    ; me guardo el resultado parcial en el operando inicial para la prox operacion
     mov rcx, 16
     lea rsi, [resultadoParcial]
     lea rdi, [operandoInicial]
     repe movsb
     
     ; borro el contenido xq si no se pisa
-    call borrarContenidoOperacion ; CHEQUEAR ESTO!
+    call borrarContenidoOperacion
     
     ; Leo el siguiente registro:
     mov rbx, [cantidadRegistros]
@@ -189,7 +188,7 @@ aplicarOperacion:
 
     andProxComparacion:
     push rcx
-    mov rcx, 1 ; comparacion
+    mov rcx, 1
     lea rsi, [operandoInicial + rbx]
     lea rdi, [operando + rbx]
     cmpsb 
@@ -206,7 +205,7 @@ aplicarOperacion:
 
     andSonIguales:
     ; caso los dos son 1
-    lea rsi, [operandoInicial + rbx] ; AGREAGADO
+    lea rsi, [operandoInicial + rbx]
     lea rdi, [comparacionOperacionesUno]
     cmpsb
     je andAmbosSonUno ; significa que es un 1
@@ -229,7 +228,7 @@ aplicarOperacion:
 
     orProxComparacion:
     push rcx
-    mov rcx, 1 ; comparacion
+    mov rcx, 1
     lea rsi, [operandoInicial + rbx]
     lea rdi, [operando + rbx]
     cmpsb 
@@ -246,7 +245,7 @@ aplicarOperacion:
 
     orSonIguales:
     ; caso los dos son 1
-    lea rsi, [operandoInicial + rbx] ; AGREAGADO
+    lea rsi, [operandoInicial + rbx]
     lea rdi, [comparacionOperacionesUno]
     cmpsb
     je orAmbosSonUno ; significa que es un 1
@@ -257,7 +256,7 @@ aplicarOperacion:
     jmp orProx
 
     orAmbosSonUno:
-    lea rsi, [comparacionOperacionesUno] ; AGREAGADO
+    lea rsi, [comparacionOperacionesUno]
     lea rdi, [resultadoParcial + rbx]
     movsb
     jmp orProx
@@ -269,7 +268,7 @@ aplicarOperacion:
 
     xOrProxOperacion:
     push rcx
-    mov rcx, 1 ; comparacion
+    mov rcx, 1
     lea rsi, [operandoInicial + rbx]
     lea rdi, [operando + rbx]
     cmpsb 
@@ -286,7 +285,7 @@ aplicarOperacion:
 
     xOrSonIguales:
     ; caso los dos son 1
-    lea rsi, [operandoInicial + rbx] ; AGREAGADO
+    lea rsi, [operandoInicial + rbx]
     lea rdi, [comparacionOperacionesUno]
     cmpsb
     je xOrAmbosSonUno ; significa que es un 1
@@ -352,7 +351,7 @@ validarOperandoInicial:
     mov rbx, 0
     mov rcx, 16
     
-    _proximaOperando:
+    _proximoOperando:
     push rcx
     mov rcx, 1
     lea rsi, [operandoInicial + rbx]
@@ -362,8 +361,8 @@ validarOperandoInicial:
     jne _segudnoOperando
     _proximaComparacion:
     add rbx, 1
-    loop _proximaOperando
-    mov byte[registroValido], "S"
+    loop _proximoOperando
+    mov byte[registroValido], "S" ; PUEDO SACAR ESTO ????
     ret
 
     _segudnoOperando:
@@ -384,7 +383,7 @@ validarOperando:
     mov rbx, 0
     mov rcx, 16
     
-    proximaOperando:
+    proximoOperando:
     push rcx
     mov rcx, 1
     lea rsi, [operando + rbx]
@@ -394,8 +393,8 @@ validarOperando:
     jne segudnoOperando
     proximaComparacion:
     add rbx, 1
-    loop proximaOperando
-    mov byte[registroValido], "S"
+    loop proximoOperando
+    mov byte[registroValido], "S" ; PUEDO SACAR ESTO????
     ret
 
     segudnoOperando:
@@ -414,15 +413,15 @@ validarOperando:
 validarOperacion:
     mov byte[registroValido], "S"
     mov rbx, 0
-    mov rcx, 3 ; para el loop --> 3 operanods en total
+    mov rcx, 3 ; 3 operandos en total
     
     proximaOperacion:
-    push rcx ; me guardo el 3 del loop
-    mov rcx, 1 ; saltos que pego para comparar
+    push rcx
+    mov rcx, 1
     lea rsi, [operacion]
     lea rdi, [operacionesValidas + rbx]
     repe cmpsb
-    pop rcx ; vuelve el valor del loop
+    pop rcx
 
     je operacionOk ; si lo encontre dejo de iterar
     add rbx, 1
