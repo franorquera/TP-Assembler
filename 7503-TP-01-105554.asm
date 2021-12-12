@@ -16,7 +16,7 @@ section .data
     archivoRegistros db "registros.txt",0
     modoLecturaRegistros db "r",0
     msjErrorAperturaRegistros db "❌Error al intentar abrir el archivo Registros",0
-    msjErrorRegistroInvalido db "❌El Registro no es valido",0
+    msjErrorRegistroInvalido db "❌El Registro no es valido",10,0
     msjErrorOperandoInicialInvalido db "❌El operando ingresado es invalido",0
     msjFinDelPrograma db "Fin del programa", 0
     msjFinDelProgramaPorErrorRegistro db "Fin del programa por registro invalido", 0
@@ -48,7 +48,6 @@ section .data
 
 section .bss
     registroValido resb 1
-    operacionAAplicar resb 1
 
 section .text    
 
@@ -63,8 +62,6 @@ main:
     sub	rsp, 32
 	call printf
 	add	rsp, 32
-
-    ;call validarLongitudOperandoInicial
 
     ; Chequeo que el operando ingresado sea valido
     mov byte[registroValido], "N" ; el registro comienza no siendo valido
@@ -312,9 +309,6 @@ borrarContenidoOperacion:
 
 ;------------------------------------------------------
 ; Validar Operando Inicial
-
-validarLongitudOperandoInicial:
-
 validarOperandoInicial:
     mov byte[registroValido], "S"
     mov rbx, 0
@@ -331,6 +325,16 @@ validarOperandoInicial:
     _proximaComparacion:
     add rbx, 1
     loop _proximoOperando
+    ; Una vez que finaliza el loop verifico que la longitud del Op Inicial sea correcta (16 bytes)
+    mov rcx, 1
+    mov rbx, 17
+    lea rsi, [operandoInicial + rbx]
+    lea rdi, [ceroAuxiliar]
+    cmpsb
+    je _operandoNoValido
+    lea rsi, [operandoInicial + rbx]
+    lea rdi, [unoAuxiliar]
+    je _operandoNoValido
     ret
 
     _segudnoOperando:
@@ -383,7 +387,7 @@ validarOperando:
 validarOperacion:
     mov byte[registroValido], "S"
     mov rbx, 0
-    mov rcx, 3 ; 3 operandos en total
+    mov rcx, 3 ; 3 operaciones validas en total
     
     proximaOperacion:
     push rcx
