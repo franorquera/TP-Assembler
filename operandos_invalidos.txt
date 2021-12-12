@@ -9,5 +9,5 @@ menos de 16 digitos:
 digito invalido (numero):
 0000000000011311
 
-operanods de mas de 16 digitos:
+operando de mas de 16 digitos:
 0000111100001111000000

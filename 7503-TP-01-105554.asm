@@ -10,8 +10,6 @@ extern	gets
 extern  fopen
 extern  fclose
 extern  fgets
-extern  fputs
-extern  sscanf
 
 section .data
     ; Mensajes y manejo de archivos
@@ -65,6 +63,8 @@ main:
     sub	rsp, 32
 	call printf
 	add	rsp, 32
+
+    ;call validarLongitudOperandoInicial
 
     ; Chequeo que el operando ingresado sea valido
     mov byte[registroValido], "N" ; el registro comienza no siendo valido
@@ -312,6 +312,9 @@ borrarContenidoOperacion:
 
 ;------------------------------------------------------
 ; Validar Operando Inicial
+
+validarLongitudOperandoInicial:
+
 validarOperandoInicial:
     mov byte[registroValido], "S"
     mov rbx, 0
@@ -328,7 +331,6 @@ validarOperandoInicial:
     _proximaComparacion:
     add rbx, 1
     loop _proximoOperando
-    ; Una vez chequeado que todos los 
     ret
 
     _segudnoOperando:
