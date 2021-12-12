@@ -1,0 +1,13 @@
+operanodsInvalidos:
+
+digito invalido:
+11111F1111111111
+
+menos de 16 digitos:
+00000000001111
+
+digito invalido (numero):
+0000000000011311
+
+operanods de mas de 16 digitos:
+0000111100001111000000

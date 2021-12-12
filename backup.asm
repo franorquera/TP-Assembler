@@ -18,7 +18,7 @@ section .data
     archivoRegistros db "registros.txt",0
     modoLecturaRegistros db "r",0
     msjErrorAperturaRegistros db "❌Error al intentar abrir el archivo Registros",0
-    msjErrorRegistroInvalido db "❌El Registro no es valido",0
+    msjErrorRegistroInvalido db "❌El operando u operacion no es valido",0
     msjErrorOperandoInicialInvalido db "❌El operando ingresado es invalido",0
     msjFinDelPrograma db "Fin del programa", 0
     msjFinDelProgramaPorErrorRegistro db "Fin del programa por registro invalido", 0
@@ -98,11 +98,6 @@ main:
     jle cerrarRegistros
 
     call copiarOperando
-    ; Realizo la validacion del Operando del Registro
-    mov byte[registroValido], "N"
-    call validarOperando
-    cmp byte[registroValido], "N"
-    jle terminarProgramaPorRegistroInvalido
 
     mov rcx, msjOperandoRegistro
     mov rdx, [cantidadRegistros]
@@ -112,11 +107,6 @@ main:
 	add	rsp, 32
 
     call copiarOperacion
-    ; Realizo la validacion de la Operacion del Registro
-    mov byte[registroValido], "N"
-    call validarOperacion
-    cmp byte[registroValido], "N"
-    jle terminarProgramaPorRegistroInvalido
 
     mov rcx, msjOperacionRegistro
     mov rdx, [cantidadRegistros]
@@ -124,6 +114,12 @@ main:
     sub	rsp, 32
 	call printf
 	add	rsp, 32
+
+    ; Valido los registros
+    call validarRegistros
+    finValidacionRegistro:
+    cmp byte[registroValido], "N"
+    jle terminarProgramaPorRegistroInvalido
     
     ; Aplico los operandos entre el operando inicial y los del registro
     call aplicarOperacion
@@ -285,6 +281,23 @@ aplicarOperacion:
     jmp xOrProx
 
 ;------------------------------------------------------
+; Validacion de los registros
+validarRegistros:
+    mov byte[registroValido], "N" ; el registro comienza no siendo valido
+
+    call validarOperando
+    cmp byte[registroValido], "N"
+    jle finValidacionRegistro
+
+    call validarOperacion
+    cmp byte[registroValido], "N"
+    jle finValidacionRegistro
+
+    mov byte[registroValido], "S" ; si llego hasta aca quiere decir que el registro es valido
+
+    ret
+
+;------------------------------------------------------
 ; Copio los valores del buffer al operando y la operacion
 copiarOperando:
     mov rcx, 16
@@ -322,22 +335,18 @@ validarOperandoInicial:
     mov rcx, 1
     lea rsi, [operandoInicial + rbx]
     lea rdi, [ceroAuxiliar]
-    cmpsb
+    repe cmpsb
     pop rcx
     jne _segudnoOperando
     _proximaComparacion:
     add rbx, 1
     loop _proximoOperando
-    ; Una vez chequeado que todos los 
     ret
 
     _segudnoOperando:
-    push rcx
-    mov rcx, 1
     lea rsi, [operandoInicial + rbx]
     lea rdi, [unoAuxiliar]
     cmpsb
-    pop rcx
     jne _operandoNoValido
     jmp _proximaComparacion
 
@@ -346,7 +355,7 @@ validarOperandoInicial:
     ret
 
 ;------------------------------------------------------
-;Validar Operando
+;VALIDAR Operando
 validarOperando:
     mov byte[registroValido], "S"
     mov rbx, 0
@@ -377,7 +386,7 @@ validarOperando:
     ret
 
 ;------------------------------------------------------
-;Validar Operacion
+;VALIDAR Operacion
 validarOperacion:
     mov byte[registroValido], "S"
     mov rbx, 0
