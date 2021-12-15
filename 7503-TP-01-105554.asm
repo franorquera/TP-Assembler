@@ -19,7 +19,6 @@ section .data
     msjErrorRegistroInvalido db "❌El Registro no es valido",10,0
     msjErrorOperandoInicialInvalido db "❌El operando ingresado es invalido",0
     msjFinDelPrograma db "Fin del programa", 0
-    msjFinDelProgramaPorErrorRegistro db "Fin del programa por registro invalido", 0
     registrosId dq 0
     
     ; Mensajes para imprimir las operaciones entre registros
